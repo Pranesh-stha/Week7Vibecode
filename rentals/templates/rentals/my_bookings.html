@@ -1,0 +1,68 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}My Bookings - DriveEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-calendar-check me-2"></i>My Bookings</h2>
+
+  {% if bookings %}
+  <div class="row g-4">
+    {% for booking in bookings %}
+    <div class="col-12">
+      <div class="card p-4">
+        <div class="row align-items-center">
+          <div class="col-md-2 text-center">
+            {% if booking.vehicle.display_image %}
+            <img src="{{ booking.vehicle.display_image }}" alt="{{ booking.vehicle.name }}" class="img-fluid rounded" style="max-height:80px;object-fit:cover">
+            {% else %}
+            <i class="bi bi-car-front display-4 text-muted"></i>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <h5 class="fw-bold mb-1">{{ booking.vehicle.name }}</h5>
+            <p class="text-muted small mb-1">{{ booking.vehicle.year }} {{ booking.vehicle.make }} {{ booking.vehicle.model }}</p>
+            <p class="text-muted small mb-0"><i class="bi bi-tag me-1"></i>Booking #{{ booking.pk }}</p>
+          </div>
+          <div class="col-md-3">
+            <p class="mb-1 small"><i class="bi bi-calendar me-2 text-success"></i><strong>From:</strong> {{ booking.start_date|date:"M d, Y" }}</p>
+            <p class="mb-1 small"><i class="bi bi-calendar me-2 text-danger"></i><strong>To:</strong> {{ booking.end_date|date:"M d, Y" }}</p>
+            <p class="mb-0 small"><i class="bi bi-clock me-2"></i><strong>Duration:</strong> {{ booking.duration_days }} day{{ booking.duration_days|pluralize }}</p>
+          </div>
+          <div class="col-md-3 text-end">
+            <span class="badge bg-{{ booking.status_badge_color }} fs-6 mb-2 d-block">{{ booking.get_status_display }}</span>
+            <p class="fw-bold text-danger mb-2">${{ booking.total_cost }}</p>
+            {% if booking.status in 'pending,confirmed' %}
+            <form method="post" action="{% url 'cancel_booking' booking.pk %}" class="d-inline"
+                  onsubmit="return confirm('Are you sure you want to cancel this booking?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-x-circle me-1"></i>Cancel
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% if booking.pickup_location or booking.dropoff_location %}
+        <hr class="my-3">
+        <div class="row text-muted small">
+          <div class="col-md-6"><i class="bi bi-geo-alt me-1 text-success"></i><strong>Pickup:</strong> {{ booking.pickup_location }}</div>
+          <div class="col-md-6"><i class="bi bi-geo-alt-fill me-1 text-danger"></i><strong>Drop-off:</strong> {{ booking.dropoff_location }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-calendar-x display-1 text-muted"></i>
+    <h4 class="mt-3 text-muted">No bookings yet</h4>
+    <p class="text-muted">You haven't made any bookings. Start exploring our fleet!</p>
+    <a href="{% url 'vehicle_list' %}" class="btn btn-accent mt-2">
+      <i class="bi bi-search me-2"></i>Browse Vehicles
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

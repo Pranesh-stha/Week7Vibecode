@@ -1,0 +1,163 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}{{ vehicle.name }} - DriveEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'vehicle_list' %}">Vehicles</a></li>
+      <li class="breadcrumb-item active">{{ vehicle.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      {% if vehicle.display_image %}
+      <img src="{{ vehicle.display_image }}" alt="{{ vehicle.name }}" class="img-fluid rounded-3 w-100" style="max-height:400px;object-fit:cover">
+      {% else %}
+      <div class="d-flex align-items-center justify-content-center bg-light rounded-3" style="height:400px">
+        <i class="bi bi-car-front display-1 text-muted"></i>
+      </div>
+      {% endif %}
+
+      <div class="card mt-4 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-card-list me-2"></i>Specifications</h5>
+        <div class="row g-3">
+          <div class="col-6"><small class="text-muted">Make</small><p class="fw-semibold mb-0">{{ vehicle.make }}</p></div>
+          <div class="col-6"><small class="text-muted">Model</small><p class="fw-semibold mb-0">{{ vehicle.model }}</p></div>
+          <div class="col-6"><small class="text-muted">Year</small><p class="fw-semibold mb-0">{{ vehicle.year }}</p></div>
+          <div class="col-6"><small class="text-muted">Color</small><p class="fw-semibold mb-0">{{ vehicle.color }}</p></div>
+          <div class="col-6"><small class="text-muted">Seats</small><p class="fw-semibold mb-0">{{ vehicle.seats }}</p></div>
+          <div class="col-6"><small class="text-muted">Fuel Type</small><p class="fw-semibold mb-0">{{ vehicle.get_fuel_type_display }}</p></div>
+          <div class="col-6"><small class="text-muted">Transmission</small><p class="fw-semibold mb-0">{{ vehicle.get_transmission_display }}</p></div>
+          <div class="col-6"><small class="text-muted">Mileage</small><p class="fw-semibold mb-0">{{ vehicle.mileage|floatformat:0 }} km</p></div>
+        </div>
+        {% if vehicle.description %}
+        <hr>
+        <h6 class="fw-bold">About this vehicle</h6>
+        <p class="text-muted">{{ vehicle.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-4 sticky-top" style="top:20px">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">{{ vehicle.name }}</h4>
+          <span class="badge bg-{{ vehicle.type_badge_color }}">{{ vehicle.get_vehicle_type_display }}</span>
+        </div>
+
+        <div class="d-flex align-items-center mb-3">
+          <span class="display-6 fw-bold text-danger">${{ vehicle.daily_rate }}</span>
+          <span class="text-muted ms-2">/day</span>
+        </div>
+
+        {% if vehicle.is_available %}
+        <div class="alert alert-success py-2">
+          <i class="bi bi-check-circle me-2"></i>Available for rental
+        </div>
+
+        <!-- Cost Calculator -->
+        <div class="card bg-light p-3 mb-3">
+          <h6 class="fw-bold mb-3"><i class="bi bi-calculator me-2"></i>Estimate Cost</h6>
+          <div class="mb-2">
+            <label class="form-label small">Start Date</label>
+            <input type="date" id="calcStart" class="form-control form-control-sm">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small">End Date</label>
+            <input type="date" id="calcEnd" class="form-control form-control-sm">
+          </div>
+          <div id="costResult" class="text-center py-2" style="display:none">
+            <strong><span id="calcDays"></span> days</strong> &times; ${{ vehicle.daily_rate }} =
+            <span class="text-danger fw-bold fs-5" id="calcTotal"></span>
+          </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'book_vehicle' vehicle.pk %}" class="btn btn-accent w-100 btn-lg">
+          <i class="bi bi-calendar-plus me-2"></i>Book Now
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}?next={% url 'book_vehicle' vehicle.pk %}" class="btn btn-accent w-100 btn-lg">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Login to Book
+        </a>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-danger py-2">
+          <i class="bi bi-x-circle me-2"></i>Currently unavailable
+        </div>
+        <button class="btn btn-secondary w-100 btn-lg" disabled>Not Available</button>
+        {% endif %}
+
+        <div class="mt-3 text-muted small">
+          <p class="mb-1"><i class="bi bi-shield-check me-2 text-success"></i>Fully insured</p>
+          <p class="mb-1"><i class="bi bi-arrow-left-right me-2 text-primary"></i>Free cancellation (2+ days notice)</p>
+          <p class="mb-0"><i class="bi bi-headset me-2 text-warning"></i>24/7 roadside assistance</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if related_vehicles %}
+  <div class="mt-5">
+    <h4 class="fw-bold mb-4">Similar Vehicles</h4>
+    <div class="row g-4">
+      {% for v in related_vehicles %}
+      <div class="col-md-4">
+        <div class="card vehicle-card">
+          {% if v.display_image %}
+          <img src="{{ v.display_image }}" alt="{{ v.name }}">
+          {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-light" style="height:160px;border-radius:12px 12px 0 0">
+            <i class="bi bi-car-front display-3 text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="card-body">
+            <h6 class="fw-bold">{{ v.name }}</h6>
+            <p class="text-danger fw-bold mb-2">${{ v.daily_rate }}/day</p>
+            <a href="{% url 'vehicle_detail' v.pk %}" class="btn btn-outline-dark btn-sm w-100">View Details</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const vehicleId = {{ vehicle.pk }};
+  const startInput = document.getElementById('calcStart');
+  const endInput = document.getElementById('calcEnd');
+
+  function updateCost() {
+    const start = startInput.value;
+    const end = endInput.value;
+    if (!start || !end) return;
+    fetch(`/api/calculate-cost/?vehicle_id=${vehicleId}&start_date=${start}&end_date=${end}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.days && data.days > 0) {
+          document.getElementById('calcDays').textContent = data.days;
+          document.getElementById('calcTotal').textContent = '$' + data.cost.toFixed(2);
+          document.getElementById('costResult').style.display = 'block';
+        } else {
+          document.getElementById('costResult').style.display = 'none';
+        }
+      }).catch(() => {});
+  }
+
+  startInput.addEventListener('change', updateCost);
+  endInput.addEventListener('change', updateCost);
+
+  const today = new Date().toISOString().split('T')[0];
+  startInput.min = today;
+  endInput.min = today;
+  startInput.addEventListener('change', () => { endInput.min = startInput.value; });
+</script>
+{% endblock %}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}DriveEasy - Vehicle Rental{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a1a2e;
+      --accent: #e94560;
+      --light-bg: #f8f9fa;
+    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--light-bg); }
+    .navbar-brand { font-weight: 700; font-size: 1.5rem; color: var(--accent) !important; }
+    .navbar { background: var(--primary) !important; }
+    .navbar .nav-link { color: rgba(255,255,255,.85) !important; }
+    .navbar .nav-link:hover { color: var(--accent) !important; }
+    .btn-accent { background: var(--accent); color: #fff; border: none; }
+    .btn-accent:hover { background: #c73652; color: #fff; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 15px rgba(0,0,0,.08); transition: transform .2s; }
+    .card:hover { transform: translateY(-4px); }
+    .vehicle-card img { height: 200px; object-fit: cover; border-radius: 12px 12px 0 0; }
+    .hero { background: linear-gradient(135deg, var(--primary) 0%, #16213e 100%); color: #fff; padding: 80px 0; }
+    .hero h1 { font-size: 3rem; font-weight: 700; }
+    .stat-card { background: var(--primary); color: #fff; border-radius: 12px; padding: 20px; text-align: center; }
+    .stat-card .number { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    footer { background: var(--primary); color: rgba(255,255,255,.7); padding: 40px 0 20px; margin-top: 60px; }
+    .badge-vehicle { font-size: .75rem; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">
+      <i class="bi bi-car-front-fill me-2"></i>DriveEasy
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'vehicle_list' %}"><i class="bi bi-car-front me-1"></i>Vehicles</a></li>
+        {% if user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'my_bookings' %}"><i class="bi bi-calendar-check me-1"></i>My Bookings</a></li>
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav">
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name|default:user.username }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+            {% if user.is_staff %}
+            <li><a class="dropdown-item" href="/admin/"><i class="bi bi-gear me-2"></i>Admin</a></li>
+            {% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+              </form>
+            </li>
+          </ul>
+        </li>
+        {% else %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a></li>
+        <li class="nav-item"><a class="nav-link btn btn-accent px-3 ms-2 rounded" href="{% url 'register' %}">Register</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h5 class="text-white"><i class="bi bi-car-front-fill me-2"></i>DriveEasy</h5>
+        <p>Your trusted vehicle rental platform. Quality cars, affordable prices.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6 class="text-white">Quick Links</h6>
+        <ul class="list-unstyled">
+          <li><a href="{% url 'vehicle_list' %}" class="text-decoration-none" style="color:rgba(255,255,255,.7)">Browse Vehicles</a></li>
+          <li><a href="{% url 'register' %}" class="text-decoration-none" style="color:rgba(255,255,255,.7)">Create Account</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h6 class="text-white">Contact</h6>
+        <p><i class="bi bi-envelope me-2"></i>support@driveeasy.com</p>
+        <p><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</p>
+      </div>
+    </div>
+    <hr style="border-color:rgba(255,255,255,.2)">
+    <p class="text-center mb-0">&copy; 2024 DriveEasy. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

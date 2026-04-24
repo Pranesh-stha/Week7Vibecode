@@ -1,0 +1,131 @@
+{% extends 'rentals/base.html' %}
+
+{% block title %}DriveEasy - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container text-center">
+    <h1><i class="bi bi-car-front-fill me-3"></i>Find Your Perfect Ride</h1>
+    <p class="lead mt-3 mb-4">Rent quality vehicles at unbeatable prices. Easy booking, flexible terms.</p>
+    <a href="{% url 'vehicle_list' %}" class="btn btn-accent btn-lg px-5 me-3">
+      <i class="bi bi-search me-2"></i>Browse Vehicles
+    </a>
+    {% if not user.is_authenticated %}
+    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg px-5">
+      <i class="bi bi-person-plus me-2"></i>Get Started
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="py-5" style="background:#fff">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="number">{{ total_vehicles }}</div>
+          <div>Total Vehicles</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="number">{{ available_vehicles }}</div>
+          <div>Available Now</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="number">{{ total_bookings }}</div>
+          <div>Happy Rentals</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-5">Why Choose DriveEasy?</h2>
+    <div class="row g-4">
+      <div class="col-md-3 text-center">
+        <div class="card p-4">
+          <i class="bi bi-shield-check display-4 text-success mb-3"></i>
+          <h5>Fully Insured</h5>
+          <p class="text-muted small">All vehicles come with comprehensive insurance coverage.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="card p-4">
+          <i class="bi bi-clock display-4 text-primary mb-3"></i>
+          <h5>24/7 Support</h5>
+          <p class="text-muted small">Round-the-clock customer support for all your needs.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="card p-4">
+          <i class="bi bi-wallet2 display-4 text-warning mb-3"></i>
+          <h5>Best Prices</h5>
+          <p class="text-muted small">Competitive daily rates with no hidden fees.</p>
+        </div>
+      </div>
+      <div class="col-md-3 text-center">
+        <div class="card p-4">
+          <i class="bi bi-geo-alt display-4 text-danger mb-3"></i>
+          <h5>Flexible Pickup</h5>
+          <p class="text-muted small">Multiple pickup and drop-off locations available.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Vehicles -->
+<section class="py-5" style="background:#fff">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Available Vehicles</h2>
+      <a href="{% url 'vehicle_list' %}" class="btn btn-outline-dark">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for vehicle in featured_vehicles %}
+      <div class="col-md-4">
+        <div class="card vehicle-card h-100">
+          {% if vehicle.display_image %}
+          <img src="{{ vehicle.display_image }}" alt="{{ vehicle.name }}">
+          {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-light" style="height:200px;border-radius:12px 12px 0 0">
+            <i class="bi bi-car-front display-1 text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">{{ vehicle.name }}</h5>
+              <span class="badge bg-{{ vehicle.type_badge_color }}">{{ vehicle.get_vehicle_type_display }}</span>
+            </div>
+            <p class="text-muted small mb-1"><i class="bi bi-calendar me-1"></i>{{ vehicle.year }} &bull; {{ vehicle.make }} {{ vehicle.model }}</p>
+            <p class="text-muted small mb-3"><i class="bi bi-people me-1"></i>{{ vehicle.seats }} seats &bull; {{ vehicle.get_transmission_display }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <span class="fs-5 fw-bold text-danger">${{ vehicle.daily_rate }}</span>
+                <span class="text-muted small">/day</span>
+              </div>
+              <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-accent btn-sm">
+                <i class="bi bi-info-circle me-1"></i>Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-car-front display-1"></i>
+        <p class="mt-3">No vehicles available at the moment.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
